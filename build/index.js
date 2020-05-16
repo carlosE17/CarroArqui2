@@ -1,18 +1,60 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express"); // Create a new express app instance
 var app = express();
+var cors_1 = __importDefault(require("cors"));
 var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(cors_1.default());
+//------------------------------------------------------------------------------------SOCKET--------------------------------------------------
+var http = require("http").Server(app);
+// set up socket.io and bind it to our
+// http server.
+var io = require("socket.io")(http, {
+    handlePreflightRequest: function (req, res) {
+        var headers = {
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "Access-Control-Allow-Origin": req.headers.origin,
+            "Access-Control-Allow-Credentials": true
+        };
+        res.writeHead(200, headers);
+        res.end();
+    }
+});
+io.on('connection', function (socket) {
+    console.log('user connected');
+    socket.on('nuevoJuego', function (message) {
+        newJuego();
+    });
+});
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 var pista = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
-var activo = true;
+var punteo = 0;
+var tiempo = 0;
+var activo = false;
 var xj = 2, yj = 7, contador = 0, temp = 4;
 pista[yj][xj] = 1;
 //______________________________________________________logica de la matriz________________________________________________________________
 //enemigos 2,3,4
 //jugador 1
 //vacio 0
+function sumarPunteo(e) {
+    switch (e) {
+        case 2:
+            punteo += 2;
+            break;
+        case 3:
+            punteo += 3;
+            break;
+        case 4:
+            punteo += 5;
+            break;
+    }
+}
 function newEnemigo() {
     var r = Number(Math.floor(Math.random() * 4));
     var e = Number(Math.floor(Math.random() * 3) + 2);
@@ -22,6 +64,17 @@ function colision() {
     console.log('colision!!');
     pista = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
     activo = false;
+}
+function newJuego() {
+    activo = true;
+    xj = 2;
+    yj = 7;
+    contador = 0;
+    temp = 4;
+    pista = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+    pista[yj][xj] = 1;
+    tiempo = 0;
+    punteo = 0;
 }
 function actualizarM() {
     if (activo) {
@@ -35,6 +88,7 @@ function actualizarM() {
                     var enemyType = pista[i][j];
                     if (i == pista.length - 1) {
                         pista[i][j] = 0;
+                        sumarPunteo(Number(enemyType));
                     }
                     else {
                         if (pista[i + 1][j] == 1) {
@@ -52,8 +106,8 @@ function actualizarM() {
         pista.forEach(function (fila) {
             console.log(fila);
         });
-        console.log('------------------------');
-        //enviar matriz a front end :v
+        console.log('-------T:' + tiempo + '-----------------P:' + punteo);
+        io.sockets.emit('matriz', { matriz: pista, punteo: punteo, tiempo: tiempo, activo: activo });
         contador++;
     }
 }
@@ -112,24 +166,26 @@ function down() {
 function moverse(d) {
     if (activo) {
         switch (d) {
-            case 0:
+            case 2:
                 izquierda();
                 break;
             case 1:
                 derecha();
                 break;
-            case 2:
+            case 3:
                 up();
                 break;
-            case 3:
+            case 4:
                 down();
                 break;
         }
+        io.sockets.emit('matriz', { matriz: pista, punteo: punteo, tiempo: tiempo, activo: activo });
     }
 }
+//matriz, punteo, tiempo, activo
 //-----------------------------------------------------------------------LOOP----------------------------------------------------------
-var timeIntevalSeconds = 3;
-setInterval(function () { actualizarM(); }, timeIntevalSeconds * 1000);
+var timeIntevalSeconds = 1;
+setInterval(function () { actualizarM(); tiempo++; }, timeIntevalSeconds * 1000);
 //_____________________________________server endpoints_________________________________________________________
 app.get('/', function (req, res) {
     res.send('funciona!  ( -w-)/');
@@ -139,6 +195,11 @@ app.post('/moverse', function (req, res) {
     moverse(Number(req.body.direccion));
     res.send("ok");
 });
-app.listen(3000, function () {
-    console.log('App is listening on port 3000!');
+app.post('/reiniciar', function (req, res) {
+    //console.log(req.body);
+    newJuego();
+    res.send("ok");
+});
+app.listen(8080, function () {
+    console.log('App is listening on port 8080!');
 });
