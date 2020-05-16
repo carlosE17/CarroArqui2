@@ -57,8 +57,9 @@ function sumarPunteo(e) {
 }
 function newEnemigo() {
     var r = Number(Math.floor(Math.random() * 4));
-    var e = Number(Math.floor(Math.random() * 3) + 2);
-    pista[0][r] = e;
+    var notRandomNumbers = [2, 2, 3, 2, 2, 3, 2, 3, 4, 4];
+    var e = Math.floor(Math.random() * notRandomNumbers.length);
+    pista[0][r] = notRandomNumbers[e];
 }
 function colision() {
     console.log('colision!!');

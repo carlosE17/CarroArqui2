@@ -69,8 +69,9 @@ function sumarPunteo(e: Number) {
 
 function newEnemigo() {
     let r = Number(Math.floor(Math.random() * 4));
-    let e = Number(Math.floor(Math.random() * 3) + 2);
-    pista[0][r] = e;
+    let notRandomNumbers = [2, 2, 3, 2, 2, 3, 2, 3, 4, 4];
+    let e = Math.floor(Math.random() * notRandomNumbers.length);
+    pista[0][r] = notRandomNumbers[e];
 
 }
 
