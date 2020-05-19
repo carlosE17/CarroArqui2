@@ -7,6 +7,7 @@ var express = require("express"); // Create a new express app instance
 var app = express();
 var cors_1 = __importDefault(require("cors"));
 var bodyParser = require('body-parser');
+app.set("port", process.env.PORT || 8080);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors_1.default());
