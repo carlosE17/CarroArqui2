@@ -114,6 +114,7 @@ function actualizarM() {
                     } else {
                         if (pista[i + 1][j] == 1) {
                             colision();
+                            return;
                         } else {
                             pista[i + 1][j] = enemyType;
 
@@ -230,7 +231,7 @@ app.post('/moverse', (req: any, res: any) => {
     //console.log(req.body);
     moverse(Number(req.body.direccion));
     io.sockets.emit('matriz', { matriz: pista, punteo: punteo, tiempo: tiempo, activo: activo, esquivados: esquivados });
-       
+
     res.send("ok");
 });
 
