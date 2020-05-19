@@ -1,14 +1,13 @@
-import express = require('express');// Create a new express app instance
-const app = express();
-import cors from 'cors';
-import * as path from "path";
+var express = require('express');
 import * as socketio from "socket.io";
-
+import * as path from "path";
 const bodyParser = require('body-parser');
+
+const app = express();
 app.set("port", process.env.PORT || 8080);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(cors());
+
 
 
 
@@ -18,22 +17,9 @@ app.use(cors());
 let http = require("http").Server(app);
 // set up socket.io and bind it to our
 // http server.
-let io = require("socket.io")(http, {
-    handlePreflightRequest: (req :any, res:any) => {
-        const headers = {
-            "Access-Control-Allow-Origin": "*", //or the specific origin you want to give access to,
-            "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept"
-        };
-        res.writeHead(200, headers);
-        res.end();
-    }
-});
+let io = require("socket.io")(http);
 
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
+
 
 io.on('connection', function (socket: any) {
     console.log('user connected');
@@ -234,8 +220,8 @@ setInterval(() => { actualizarM(); tiempo++; }, timeIntevalSeconds * 1000);
 //_____________________________________server endpoints_________________________________________________________
 
 
-app.get('/', function (req, res) {
-    res.send('funciona!  ( -w-)/');
+app.get("/", (req: any, res: any) => {
+    res.send("funciona!! (^_^)/");
 });
 
 
@@ -257,6 +243,7 @@ app.post('/reiniciar', (req: any, res: any) => {
 
 
 
-app.listen(8080, function () {
-    console.log('App is listening on port 8080!');
+
+const server = http.listen(8080, function () {
+    console.log("listening on *:8080");
 });

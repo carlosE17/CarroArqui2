@@ -1,35 +1,16 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var express = require("express"); // Create a new express app instance
-var app = express();
-var cors_1 = __importDefault(require("cors"));
+var express = require('express');
 var bodyParser = require('body-parser');
+var app = express();
 app.set("port", process.env.PORT || 8080);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(cors_1.default());
 //------------------------------------------------------------------------------------SOCKET--------------------------------------------------
 var http = require("http").Server(app);
 // set up socket.io and bind it to our
 // http server.
-var io = require("socket.io")(http, {
-    handlePreflightRequest: function (req, res) {
-        var headers = {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept"
-        };
-        res.writeHead(200, headers);
-        res.end();
-    }
-});
-app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
+var io = require("socket.io")(http);
 io.on('connection', function (socket) {
     console.log('user connected');
     socket.on('nuevoJuego', function (message) {
@@ -209,8 +190,8 @@ function moverse(d) {
 var timeIntevalSeconds = 1;
 setInterval(function () { actualizarM(); tiempo++; }, timeIntevalSeconds * 1000);
 //_____________________________________server endpoints_________________________________________________________
-app.get('/', function (req, res) {
-    res.send('funciona!  ( -w-)/');
+app.get("/", function (req, res) {
+    res.send("funciona!! (^_^)/");
 });
 app.post('/moverse', function (req, res) {
     //console.log(req.body);
@@ -223,6 +204,6 @@ app.post('/reiniciar', function (req, res) {
     newJuego();
     res.send("ok");
 });
-app.listen(8080, function () {
-    console.log('App is listening on port 8080!');
+var server = http.listen(8080, function () {
+    console.log("listening on *:8080");
 });
