@@ -92,6 +92,7 @@ function actualizarM() {
                     else {
                         if (pista[i + 1][j] == 1) {
                             colision();
+                            return;
                         }
                         else {
                             pista[i + 1][j] = enemyType;
