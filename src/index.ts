@@ -19,18 +19,21 @@ let http = require("http").Server(app);
 // set up socket.io and bind it to our
 // http server.
 let io = require("socket.io")(http, {
-    handlePreflightRequest: (req: any, res: any) => {
+    handlePreflightRequest: (req :any, res:any) => {
         const headers = {
-            "Access-Control-Allow-Headers": "Content-Type, Authorization",
-            "Access-Control-Allow-Origin": req.headers.origin, //or the specific origin you want to give access to,
-            "Access-Control-Allow-Credentials": true
+            "Access-Control-Allow-Origin": "*", //or the specific origin you want to give access to,
+            "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept"
         };
         res.writeHead(200, headers);
         res.end();
     }
 });
 
-
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 
 io.on('connection', function (socket: any) {
     console.log('user connected');
@@ -240,7 +243,8 @@ app.get('/', function (req, res) {
 app.post('/moverse', (req: any, res: any) => {
     //console.log(req.body);
     moverse(Number(req.body.direccion));
-
+    io.sockets.emit('matriz', { matriz: pista, punteo: punteo, tiempo: tiempo, activo: activo, esquivados: esquivados });
+       
     res.send("ok");
 });
 
