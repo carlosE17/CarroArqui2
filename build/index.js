@@ -36,6 +36,8 @@ var pista = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0
 var punteo = 0;
 var tiempo = 0;
 var activo = false;
+var esquivados = [0, 0, 0];
+var movimientos = [0, 0, 0, 0];
 var xj = 2, yj = 7, contador = 0, temp = 4;
 pista[yj][xj] = 1;
 //______________________________________________________logica de la matriz________________________________________________________________
@@ -46,12 +48,15 @@ function sumarPunteo(e) {
     switch (e) {
         case 2:
             punteo += 2;
+            esquivados[0]++;
             break;
         case 3:
             punteo += 3;
+            esquivados[1]++;
             break;
         case 4:
             punteo += 5;
+            esquivados[2]++;
             break;
     }
 }
@@ -62,6 +67,11 @@ function newEnemigo() {
     pista[0][r] = notRandomNumbers[e];
 }
 function colision() {
+    var resultado = { matriz: pista, punteo: punteo, tiempo: tiempo, activo: activo, enemigos: (esquivados[0] + esquivados[1] + esquivados[2]), enemigos1: esquivados[0], enemigos2: esquivados[1], enemigos3: esquivados[2], movArriba: movimientos[0], movAbajo: movimientos[1], movDer: movimientos[2], movIzq: movimientos[3] };
+    console.log('colision!!');
+    resultado.activo = false;
+    console.log(resultado);
+    io.sockets.emit('matriz', resultado);
     console.log('colision!!');
     pista = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
     activo = false;
@@ -76,6 +86,8 @@ function newJuego() {
     pista[yj][xj] = 1;
     tiempo = 0;
     punteo = 0;
+    esquivados = [0, 0, 0];
+    movimientos = [0, 0, 0, 0];
 }
 function actualizarM() {
     if (activo) {
@@ -108,7 +120,7 @@ function actualizarM() {
             console.log(fila);
         });
         console.log('-------T:' + tiempo + '-----------------P:' + punteo);
-        io.sockets.emit('matriz', { matriz: pista, punteo: punteo, tiempo: tiempo, activo: activo });
+        io.sockets.emit('matriz', { matriz: pista, punteo: punteo, tiempo: tiempo, activo: activo, esquivados: esquivados });
         contador++;
     }
 }
@@ -169,18 +181,22 @@ function moverse(d) {
         switch (d) {
             case 2:
                 izquierda();
+                movimientos[3]++;
                 break;
             case 1:
                 derecha();
+                movimientos[2]++;
                 break;
             case 3:
                 up();
+                movimientos[0]++;
                 break;
             case 4:
                 down();
+                movimientos[1]++;
                 break;
         }
-        io.sockets.emit('matriz', { matriz: pista, punteo: punteo, tiempo: tiempo, activo: activo });
+        io.sockets.emit('matriz', { matriz: pista, punteo: punteo, tiempo: tiempo, activo: activo, esquivados: esquivados });
     }
 }
 //matriz, punteo, tiempo, activo
